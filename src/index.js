@@ -5,7 +5,6 @@ import './styles/global_styles.css';
 
 import Home from './templates/Home';
 
-
 ReactDOM.render(
   <React.StrictMode>
     <Home />

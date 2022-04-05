@@ -2,16 +2,18 @@ import { Component } from 'react'
 
 import './styles.css';
 
-import { loadPosts } from '../../utils/load-posts';
 import { Posts } from '../../components/Posts';
+import { loadPosts } from '../../utils/load-posts';
 import { Buttom } from '../../components/Buttom';
+import { TextInput } from '../../components/TextInput';
 
 class Home extends Component{
   state = {
     posts: [],
     allPosts: [],
     page: 0,
-    postPeerPage: 10
+    postPeerPage: 2,
+    searchValue : ''
   };
   
   loadPosts = async () => {
@@ -38,20 +40,47 @@ class Home extends Component{
   async componentDidMount() {
     await this.loadPosts()
   }
+
+  handleChange = (e) => {
+    const { value } = e.target;
+    this.setState({ searchValue: value });
+    
+  }
   
 
   render(){
-    const { posts, page, postPeerPage, allPosts } = this.state;
+    const { posts, page, postPeerPage, allPosts, searchValue } = this.state;
     const noMorePosts = page + postPeerPage >= allPosts.length;
+    const filteredPosts = !!searchValue ?
+      allPosts.filter(_post => {
+        return _post.title.toLowerCase().includes(searchValue.toLowerCase());
+      }) :
+      posts;
     return (
       <section className='container'>
-        <Posts posts={posts} />
+        <div class="search-container">
+          {!!searchValue && (
+              <h1>Search value: {searchValue}</h1>
+          )}
+          <TextInput searchValue={searchValue} handleChange={this.handleChange} />
+        </div>
+        
+        {filteredPosts.length > 0 && (
+          <Posts posts={filteredPosts} />
+        )}
+        {filteredPosts.length === 0 && (
+          <p>Não existem posts:(</p>
+        )}
+        
         <div className='button-container'>
-          <Buttom
+          {!searchValue && (
+            <Buttom
             text="Load More Posts"
             onClick={this.loadMorePosts}
             disabled={noMorePosts}
             />
+          )}
+          
         </div>  
       </section>
     );
