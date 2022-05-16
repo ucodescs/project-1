@@ -4,7 +4,7 @@ import './styles.css';
 
 import { Posts } from '../../components/Posts';
 import { loadPosts } from '../../utils/load-posts';
-import { Buttom } from '../../components/Buttom';
+import { Button } from '../../components/Button';
 import { TextInput } from '../../components/TextInput';
 
 export const Home = () => {
@@ -64,7 +64,7 @@ export const Home = () => {
       
       <div className='button-container'>
         {!searchValue && (
-          <Buttom
+          <Button
           text="Load More Posts"
           onClick={loadMorePosts}
           disabled={noMorePosts}

@@ -2,7 +2,7 @@ import { Component } from "react";
 
 import './styles.css';
 
-export class Buttom extends Component{
+export class Button extends Component{
     
     render(props) {
         const { text, onClick, disabled } = this.props;
