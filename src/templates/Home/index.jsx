@@ -1,4 +1,4 @@
-import { Component } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 import './styles.css';
 
@@ -7,105 +7,73 @@ import { loadPosts } from '../../utils/load-posts';
 import { Buttom } from '../../components/Buttom';
 import { TextInput } from '../../components/TextInput';
 
-class Home extends Component{
-  state = {
-    posts: [],
-    allPosts: [],
-    page: 0,
-    postPeerPage: 10,
-    searchValue : ''
-  };
+export const Home = () => {
   
-  loadPosts = async () => {
-    const { page, postPeerPage } = this.state;
-    const postAndPhotos = await loadPosts();
-    this.setState({
-      posts: postAndPhotos.slice(page,postPeerPage),
-      allPosts: postAndPhotos
-    })
-  }
+  const [posts, setPosts] = useState([]);
+  const [allPosts, setAllPosts] = useState([]);
+  const [page, setPage] = useState(0);
+  const [postPeerPage] = useState(10);
+  const [searchValue, setSearchValue] = useState('');
 
-  loadMorePosts = () => {
-    
-    const { page, postPeerPage, posts, allPosts } = this.state;
-    const nextPage = page + postPeerPage;
-    const nextPost = allPosts.slice(nextPage, nextPage + postPeerPage);
-    posts.push(...nextPost)
-    this.setState({
-      posts: posts,
-      page: nextPage
-    })
-  }
-
-  async componentDidMount() {
-    await this.loadPosts()
-  }
-
-  handleChange = (e) => {
-    const { value } = e.target;
-    this.setState({ searchValue: value });
-    
-  }
+  const noMorePosts = page + postPeerPage >= allPosts.length;
   
-
-  render(){
-    const { posts, page, postPeerPage, allPosts, searchValue } = this.state;
-    const noMorePosts = page + postPeerPage >= allPosts.length;
-    const filteredPosts = !!searchValue ?
+  const filteredPosts = !!searchValue ?
       allPosts.filter(_post => {
         return _post.title.toLowerCase().includes(searchValue.toLowerCase());
       }) :
       posts;
-    return (
-      <section className='container'>
-        <div class="search-container">
-          {!!searchValue && (
-              <h1>Search value: {searchValue}</h1>
-          )}
-          <TextInput searchValue={searchValue} handleChange={this.handleChange} />
-        </div>
-        
-        {filteredPosts.length > 0 && (
-          <Posts posts={filteredPosts} />
-        )}
-        {filteredPosts.length === 0 && (
-          <p>Não existem posts:(</p>
-        )}
-        
-        <div className='button-container'>
-          {!searchValue && (
-            <Buttom
-            text="Load More Posts"
-            onClick={this.loadMorePosts}
-            disabled={noMorePosts}
-            />
-          )}
-          
-        </div>  
-      </section>
-    );
-  }
-}
+  
+  const handleLoadPosts = useCallback(async (page, postPeerPage) => {
+    const postAndPhotos = await loadPosts();
+    setPosts(postAndPhotos.slice(page, postPeerPage));
+    setAllPosts(postAndPhotos);
+  }, []);
 
-/* function App() {
+  useEffect(() => {
+    handleLoadPosts(0, postPeerPage);
+  }, [handleLoadPosts,  postPeerPage]);
+  
+  const loadMorePosts = () => {
+    const nextPage = page + postPeerPage;
+    const nextPost = allPosts.slice(nextPage, nextPage + postPeerPage);
+    posts.push(...nextPost)
+    setPosts(posts);
+    setPage(nextPage);
+  }
+    
+  const handleChange = (e) => {
+    const { value } = e.target;
+    setSearchValue(value);
+  }
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <section className='container'>
+      <div className="search-container">
+        {!!searchValue && (
+            <h1>Search value: {searchValue}</h1>
+        )}
+        <TextInput searchValue={searchValue} handleChange={handleChange} />
+      </div>
+      
+      {filteredPosts.length > 0 && (
+        <Posts posts={filteredPosts} />
+      )}
+      {filteredPosts.length === 0 && (
+        <p>Não existem posts:(</p>
+      )}
+      
+      <div className='button-container'>
+        {!searchValue && (
+          <Buttom
+          text="Load More Posts"
+          onClick={loadMorePosts}
+          disabled={noMorePosts}
+          />
+        )}
+        
+      </div>  
+    </section>
   );
-} */
+}
 
 export default Home;
